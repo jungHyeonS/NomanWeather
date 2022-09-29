@@ -1,12 +1,30 @@
 import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View,ScrollView,Dimensions } from 'react-native';
-
-
+import * as Location from 'expo-location';
 const {width:SCREEN_WIDTH} = Dimensions.get("window");
 // component : 화면에 렌더링할 항목
 // api : 자바스크립트 코드(자바스크립트 코드가 운영체제와 소통)
 //https://reactnative.directory/
 export default function App() {
+  const [city,setCity] = useState("Loadding...");
+  const [location, setLocation] = useState();
+  const [ok,setOk] = useState(true);
+  const ask = async() => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      setOk(false);
+    }
+    const {coords:{latitude,longitude}} = await Location.getCurrentPositionAsync({accuracy:5});
+    const location = await Location.reverseGeocodeAsync({latitude,longitude},{useGoogleMaps:false})
+    setCity(location[0].region)
+  }
+  useEffect(() => {
+    ask();
+  },[])
+
+
+
   return (
     // <View style={styles.container}>
     //   <Text style={styles.text}>Hello</Text>
@@ -18,7 +36,7 @@ export default function App() {
 
 
       <View style={styles.city}>
-        <Text style={styles.cityName}>Seoul</Text>
+        <Text style={styles.cityName}>{city}</Text>
       </View>
       <ScrollView 
         pagingEnabled
